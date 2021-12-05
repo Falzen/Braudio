@@ -1,0 +1,111 @@
+*, *>* {
+	box-sizing: border-box;
+	padding: 0.1px;
+}
+body {
+	margin: 0;
+	color: #cfcfcf;
+	background-color: #0f0f0f
+}
+p {
+	margin: 0;
+}
+ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+img {
+	width: 100%;
+}
+
+#pageContainer {
+	padding: 0.1px;
+}
+.voiceForm {
+	border: 1px solid grey;
+    margin: 12px auto;
+    padding: 12px;
+    /* display: flex; */
+    /* flex-direction: column; */
+    /* align-items: stretch; */
+    width: 200px;
+}
+
+#playBtnContainer {
+}
+#playBtnContainer button {
+    /* height: 150px; */
+    /* width: 250px; */
+    display: block;
+    margin: 12px auto;
+    padding: 44px 120px;
+}
+
+
+
+div#scalesContainer {
+	display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-around;
+    max-width: 600px;
+    margin: 6px auto;
+}
+#scalesContainer p {
+	text-align: center;
+}
+ul#majorScales,
+ul#minorScales {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: center;
+	padding: 8px;
+	border: 1px solid grey;
+}
+button.oneScale {
+    width: 72px;
+    padding: 8px;
+    margin: 6px;
+}
+
+
+
+#customScalesContainer {
+	width: 550px;
+	margin: 12px auto;
+	border: 1px solid grey;
+	padding: 18px;
+}
+#customScaleTxt {
+
+}
+#customNotes {
+    margin: 0 auto;
+    width: 80%;
+}
+#customNotes li {
+	display: inline-block;
+}
+#customNotes button {
+	padding: 8px;
+	width: 44px;
+	margin: 6px;
+}
+#customNotes button.altered {
+	padding: 2px;
+}
+
+#removeAllCustomNotes,
+#validateCustomNotes {
+    width: 60%;
+    padding: 12px;
+    margin: 6px auto;
+    display: block;
+}
+
+button.lightUp-left {
+	background-color: aquamarine;
+}
+button.lightUp-right {
+	background-color: tomato;
+}

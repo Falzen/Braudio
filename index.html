@@ -1,0 +1,105 @@
+
+<!--
+	TODO
+- map avec les scales plutôt qu'une liste
+- au click sur une tonalité, récup son nom et utiliser la map (VS index de la liste now)
+- lightup la tonalitée jouée (en plus des notes)
+- 
+
+
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>items</title>
+	<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+	<div id="pageContainer">
+
+
+
+		<div class="voiceForm">
+			<input id="tempoInput" value="60" type="number" step="2" />
+			<button id="addVoiceBtn" onclick="handleAddVoice(this)">add voice</button>
+		</div>
+
+		<div id="playBtnContainer"><button id="play">play</button></div>
+		<div id="scalesContainer">
+			<div>
+				<p>Majeur</p>
+				<ul id="majorScales">
+					<li id="do-M">
+						<button class="oneScale" data-scalename="do" data-dictionnaryindex="0" data-tonality="major">Do5</button>
+						<button class="oneScale" data-scalename="do7" data-dictionnaryindex="0" data-tonality="major">Do7</button>
+					</li>
+					<li id="do-M"><button class="oneScale" data-scalename="do" data-dictionnaryindex="0" data-tonality="major">Do</button></li>
+					<li id="do_d-M"><button class="oneScale" data-scalename="do#" data-tonality="major">do#</button></li>
+					<li id="re-M"><button class="oneScale" data-scalename="re" data-dictionnaryindex="2" data-tonality="major">Re</button></li>
+					<!-- <li id="re_d-M"><button class="oneScale" data-scalename="re#" data-tonality="major">re#</button></li> -->
+					<li id="mi-M"><button class="oneScale" data-scalename="mi" data-dictionnaryindex="4" data-tonality="major">Mi</button></li>
+					<li id="fa-M"><button class="oneScale" data-scalename="fa" data-dictionnaryindex="6" data-tonality="major">Fa</button></li>
+					<!-- <li id="fa_d-M"><button class="oneScale" data-scalename="fa#" data-tonality="major">fa#</button></li> -->
+					<li id="sol-M"><button class="oneScale" data-scalename="sol" data-dictionnaryindex="8" data-tonality="major">Sol</button></li>
+					<!-- <li id="sol_d-M"><button class="oneScale" data-scalename="sol#" data-tonality="major">sol#</button></li> -->
+					<li id="la-M"><button class="oneScale" data-scalename="la" data-dictionnaryindex="10" data-tonality="major">La</button></li>
+					<!-- <li id="la_d-M"><button class="oneScale" data-scalename="la#" data-tonality="major">la#</button></li> -->
+					<li id="si-M"><button class="oneScale" data-scalename="si" data-dictionnaryindex="12" data-tonality="major">Si</button></li>
+				</ul>
+			</div>
+			<div>
+				<p>Mineur</p>
+				<ul id="minorScales">
+					<li id="do-m"><button class="oneScale" data-scalename="do" data-dictionnaryindex="1" data-tonality="minor">do</button></li>
+					<!-- <li id="do_d-m"><button class="oneScale" data-scalename="do#" data-tonality="minor">do#</button></li> -->
+					<li id="re-m"><button class="oneScale" data-scalename="re" data-dictionnaryindex="3" data-tonality="minor">re</button></li>
+					<!-- <li id="re_d-m"><button class="oneScale" data-scalename="re#" data-tonality="minor">re#</button></li> -->
+					<li id="mi-m"><button class="oneScale" data-scalename="mi" data-dictionnaryindex="5" data-tonality="minor">mi</button></li>
+					<li id="fa-m"><button class="oneScale" data-scalename="fa" data-dictionnaryindex="7" data-tonality="minor">fa</button></li>
+					<!-- <li id="fa_d-m"><button class="oneScale" data-scalename="fa#" data-tonality="minor">fa#</button></li> -->
+					<li id="sol-m"><button class="oneScale" data-scalename="sol" data-dictionnaryindex="9" data-tonality="minor">sol</button></li>
+					<!-- <li id="sol_d-m"><button class="oneScale" data-scalename="sol#" data-tonality="minor">sol#</button></li> -->
+					<li id="la-m"><button class="oneScale" data-scalename="la" data-dictionnaryindex="11" data-tonality="minor">la</button></li>
+					<!-- <li id="la_d-m"><button class="oneScale" data-scalename="la#" data-tonality="minor">la#</button></li> -->
+					<li id="si-m"><button class="oneScale" data-scalename="si" data-dictionnaryindex="13" data-tonality="minor">si</button></li>
+				</ul>
+			</div>
+		</div>
+		<div id="customScalesContainer">
+			<p id="customScaleTxt">Gamme custo : <span id="customScaleNotes"></span>
+				<div id="controlsContainer">
+					<button id="removeAllCustomNotes">Effacer</button>
+					<ul id="customNotes">
+						<li><button class="oneCustomNote" id="C">do</button></li>
+						<li><button class="oneCustomNote altered" id="Cx">do #</button></li>
+						<li><button class="oneCustomNote" id="D">re</button></li>
+						<li><button class="oneCustomNote altered" id="Dx">re #</button></li>
+						<li><button class="oneCustomNote" id="E">mi</button></li>
+						<li><button class="oneCustomNote" id="F">fa</button></li><br />
+						<li><button class="oneCustomNote altered" id="Fx">fa #</button></li>
+						<li><button class="oneCustomNote" id="G">sol</button></li>
+						<li><button class="oneCustomNote altered" id="Gx">sol #</button></li>
+						<li><button class="oneCustomNote" id="A">la</button></li>
+						<li><button class="oneCustomNote altered" id="Ax">la #</button></li>
+						<li><button class="oneCustomNote" id="B">si</button></li>
+					</ul>
+					<button id="validateCustomNotes">Valider</button>
+				</div>
+		</div>	
+		<div id="playBtnContainer"><button onclick="handleStopPlayingClick()">stop</button></div>
+		
+	
+	</div>
+
+	<!-- jquery -->
+	<script	src="js/utils/jquery.js"></script>
+	<script	src="js/utils/rivets.js"></script>
+
+	<script	src="js/datamodel.js"></script>
+	<script	src="js/utils.js"></script>
+	<script	src="js/main.js"></script>
+
+</body>
+</html>
