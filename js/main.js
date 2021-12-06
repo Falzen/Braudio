@@ -22,22 +22,10 @@ $(document).ready(function() {
 	init();
 });
 
-var noteData = {
-	name: 'A',
-	durationInTicks: 1,
-	frenquencyInHz: '440',
-};
-
 var voices = [];
 var voicesIndexesToStop = [];
-/*
-2 TEMPS = (60000/bpm)*2
-1 TEMPS = 60000/bpm
-0.5 TEMPS = (60000/bpm)/2
-*/
-var tempo = 90;
+var tempo = 120;
 var tempoInMs = 60000/tempo;
-var handIndexToDelay = 0;
 function addVoice() {
 	voices.push(new AudioContext());
 }
@@ -161,10 +149,6 @@ function playMelody(voiceIndex, hand) {
 
 	delayBeforeNextNote = tempoInMs*noteObj.durationInTicks;
 	delayBeforeNoteStops = tempoInMs*noteObj.durationInTicks;
-	// if(voiceIndex == handIndexToDelay) {
-	// 	delayBeforeNoteStops *= 2.5;
-	// 	delayBeforeNextNote *= 2;
-	// }
 
 	thisOscillator = playerControl[0];
 	thisGainNode = playerControl[1];
@@ -194,27 +178,29 @@ function playVoices() {
 		voices[i];
 	}
 }
-var spaceModulator = 1;
-let direction = 1;
-function playNote(noteObj, voice) {
 
-	if(Math.random() < 0.30) {
-		// handIndexToDelay = (-1 * handIndexToDelay) + 1;
-		// console.log('changed hand !');
-		let diff = getRandomInt(99, 101) / 10000;
-		
-		if(spaceModulator > 1.1 || spaceModulator < 0.9) {
-			direction *= -1;
+
+var spacePitching = 1;
+let spacePitchingDirection = 1;
+var doSpacePitching = false;
+function playNote(noteObj, voice) {
+	if(doSpacePitching) {
+		if(Math.random() < 0.30) {
+			let diff = getRandomInt(-10, 10) / 1000;
+			
+			if(spacePitching > 1.1 || spacePitching < 0.9) {
+				spacePitchingDirection *= -1;
+			}
+			spacePitching = 1 - (diff*spacePitchingDirection);
+			console.log('spacePitching ! ' + spacePitching);
 		}
-		// spaceModulator += diff*direction;
-		//console.log('modulated ! ' + spaceModulator);
 	}
 
 	//console.log(noteObj);
 	let oscillator = voice.createOscillator();
 	let contextGain = voice.createGain();
 	oscillator.type = 'sine';
-	let fff = Math.round((noteObj.frenquencyInHz*spaceModulator*10))/10;
+	let fff = Math.round((noteObj.frenquencyInHz*spacePitching*10))/10;
 	oscillator.frequency.value = fff;
 	oscillator.connect(contextGain);
 	contextGain.gain.value = 0.05;
@@ -352,11 +338,11 @@ function refreshCustomScaleDisplay() {
 
 
 
-var noteDurationsInTickNb = [1,1,0.5,0.5,0.5,0.5,0.5,0.5,0.25,0.25,0.25,0.25,0.25]; // ,0.25,0.25,0.25,0.25,0.25,0.25,0.25
+var noteDurationsInTickNb = [1,1,0.5,0.5,0.5,0.5,0.25,0.25,0.25]; // ,0.25,0.25,0.25,0.25,0.25,0.25,0.25
 // var noteDurationsInTickNb_right = [4/5, 4/7,  4/7,  4/7]
 // var noteDurationsInTickNb_left = [1,1,1,1]; 
 var noteDurationsInTickNb_right = [0.25, 0.25, 0.25, 0.25, 0.5];
-var noteDurationsInTickNb_left = [0.5, 0.5, 0.25];
+var noteDurationsInTickNb_left = [1, 0.5, 0.5, 0.5, 0.25];
 var chroma = [
 	'C0', 'Cx0', 'D0', 'Dx0', 'E0', 'F0', 'Fx0', 'G0', 'Gx0', 'A0', 'Ax0', 'B0', 
 	'C1', 'Cx1', 'D1', 'Dx1', 'E1', 'F1', 'Fx1', 'G1', 'Gx1', 'A1', 'Ax1', 'B1', 
@@ -425,8 +411,6 @@ var tempScalesDictionnary = [do_Majeur,do_mineur,re_Majeur,re_mineur,mi_Majeur,m
 var chosenNotes;
 // chosenNotes = ACDEGGd;
 // chosenNotes = chroma;
-chosenNotes = getRandomIndex(tempScalesDictionnary);
-displayChosenNotes();
 
 
 
@@ -440,6 +424,8 @@ var tonalitiesLoopsList = [
 	]
 ];
 var chosenTonalityLoop = tonalitiesLoopsList[0];
+chosenNotes = tonalitiesLoopsList[0][0];
+displayChosenNotes();
 
 var shouldFlip = true;
 var changingKeyIntervalId;
