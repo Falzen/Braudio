@@ -21,9 +21,8 @@
 
 
 
-		<div class="voiceForm">
-			<input id="tempoInput" value="60" type="number" step="2" />
-			<button id="addVoiceBtn" onclick="handleAddVoice(this)">add voice</button>
+		<div class="voicesContainer">
+
 		</div>
 
 		<div id="playBtnContainer"><button id="play">play</button></div>
@@ -86,6 +85,9 @@
 						<li><button class="oneCustomNote" id="B">si</button></li>
 					</ul>
 					<button id="validateCustomNotes">Valider</button>
+				</div>
+				<div id="volumeContainer">
+					<ul></ul>
 				</div>
 		</div>	
 		<div id="playBtnContainer"><button onclick="handleStopPlayingClick()">stop</button></div>

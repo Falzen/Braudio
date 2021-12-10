@@ -1,19 +1,13 @@
 /*
-BACKLOG
-- 
-- 
-
-DONE
-- 
+TODO
+- add or remove voices from the volume handles
 - 
 
 AMELIO
-- 
+- allow some accidental notes (seconds and seventh first)
 - 
 
 */
-
-
 
 
 
@@ -22,19 +16,151 @@ $(document).ready(function() {
 	init();
 });
 
+
+let musicSheetTest = [
+];
+
+
+var playSettings = {
+	playingMode: {
+		// isRandom: false,
+		// isWritten: true
+		isRandom: true,
+		isWritten: false
+	},
+	musicSheet: {
+		actual: [],
+		index: 0
+	},
+	tempo: {
+		valueInBpm: 90,
+		valueInMs: 60000/90
+	},
+	volume: {
+		volumeMultiplierPerVoiceIndex: [
+			0.5, 
+			0.5, 
+			0.5
+		]
+	},
+	pitch: {
+		isPitching: false,
+		pitchValue: 1.00002,
+		pitchDirection: 1, // 1 or -1
+	},
+	modulation: {
+		shouldModulate: true
+		// shouldModulate: false
+	}
+}
+
+
+
+
 var voices = [];
 var voicesIndexesToStop = [];
-var tempo = 120;
+var tempo = 90;
 var tempoInMs = 60000/tempo;
 function addVoice() {
 	voices.push(new AudioContext());
 }
 
 function init() {
+
+
+playSettings.musicSheet.actual = [
+{
+	name: 'C4',
+	durationInTicks: 0.93,
+	frequency: getFrequencyFromName('C4')[0].frq
+},
+{
+	name: '',
+	durationInTicks: 0.07,
+	frequency: null,
+},
+
+{
+	name: 'C4',
+	durationInTicks: 0.43,
+	frequency: getFrequencyFromName('C4')[0].frq
+},
+{
+	name: '',
+	durationInTicks: 0.07,
+	frequency: null,
+},
+{
+	name: 'C4',
+	durationInTicks: 0.43,
+	frequency: getFrequencyFromName('C4')[0].frq
+},
+{
+	name: '',
+	durationInTicks: 0.07,
+	frequency: null,
+},
+{
+	name: 'D4',
+	durationInTicks: 0.93,
+	frequency: getFrequencyFromName('D4')[0].frq
+},
+{
+	name: '',
+	durationInTicks: 0.07,
+	frequency: null,
+},
+{
+	name: 'C4',
+	durationInTicks: 0.93,
+	frequency: getFrequencyFromName('C4')[0].frq
+},
+{
+	name: '',
+	durationInTicks: 0.07,
+	frequency: null,
+},
+{
+	name: '',
+	durationInTicks: 1,
+	frequency: null,
+},
+{
+	name: 'E4',
+	durationInTicks: 0.93,
+	frequency: getFrequencyFromName('E4')[0].frq
+},
+{
+	name: '',
+	durationInTicks: 0.07,
+	frequency: null,
+},
+{
+	name: 'F4',
+	durationInTicks: 0.93,
+	frequency: getFrequencyFromName('F4')[0].frq
+},
+{
+	name: '',
+	durationInTicks: 0.07,
+	frequency: null,
+},
+{
+	name: '',
+	durationInTicks: 1,
+	frequency: null,
+}
+];
+
+
 	initScale();
 	addVoice(); // melody one
-	addVoice(); // melody two
+	if(!playSettings.playingMode.isWritten) {
+		addVoice(); // melody two
+		addVoice(); // melody three
+	}	
 
+	injectVolumeRangesInDom();
 	setEventListeners();
 }
 
@@ -45,7 +171,7 @@ function setEventListeners() {
 	});
 
 	$('.oneScale').click(function(ev) {
-		console.log(ev);
+
 		let chosenScaleInfo = {
 			name: ev.currentTarget.dataset.scalename,
 			tonality: ev.currentTarget.dataset.tonality,
@@ -66,13 +192,25 @@ function setEventListeners() {
 	$('#validateCustomNotes').click(function() {
 		handleValidateCustomNotes();
 	});
+
+
+	$(document).on('click', 'input.volume-control', function(ev) {
+		let voiceIndex = ev.currentTarget.id.split('volume')[1];
+		$('#output-' + ev.currentTarget.id).text(ev.currentTarget.value + '%');
+
+		playSettings.volume.volumeMultiplierPerVoiceIndex[voiceIndex] = parseFloat(ev.currentTarget.value) / 100;
+	});
+
+
 }
 
 
 
 
 
+function removeVoiceByIndex(voiceIndex) {
 
+}
 
 
 
@@ -101,39 +239,42 @@ function handleSwitchToNewScale(wantedNotes) {
 
 
 
-
-
-
-
 function handleStopPlayingClick() {
-	console.log('STOP');
+
 	isPlaying = false;
 	stopModulationEngine = true;
-	console.log('isPlaying : ', isPlaying);
+
 	return false;
 }
 function handleStartPlayingClick() {
 	isPlaying = true;
 	playMelody(0, 'left');
 	playMelody(1, 'right');
-	startModulationEngine();
+	playMelody(2, 'right');	
+	
+
+	if(playSettings.modulation.shouldModulate) {
+		startModulationEngine();
+	}
 }
 
-var hasModulated = false;
 function playMelody(voiceIndex, hand) {
 	let notes;
+	let soundwaveType = 'sine'; // "sine", "square", "sawtooth", "triangle"
 	switch(hand) {
 		case 'left':
 		notes = currentScale.notesLeftHand;
+		soundwaveType = 'triangle';
 		break;
 		case 'right':
 		notes = currentScale.notesRightHand;
+		soundwaveType = 'triangle';
 		break;
 	}
 	if(notes == null || notes.length == 0) {
 
 	}
-	if(!isPlaying || hasModulated) {
+	if(!isPlaying) {
 		handleStopPlayingClick();
 		return false;
 	}
@@ -142,10 +283,23 @@ function playMelody(voiceIndex, hand) {
 	let playerControl;
 	let delayBeforeNextNote;
 	let delayBeforeNoteStops;
-	var noteObj = makeRandomNoteFromNotes(notes, hand);
+	var noteObj;
+	if(playSettings.playingMode.isWritten) {
+		let oneNoteData = {
+			name: playSettings.musicSheet.actual[playSettings.musicSheet.index].name,
+			durationInTicks: playSettings.musicSheet.actual[playSettings.musicSheet.index].durationInTicks,
+			frenquencyInHz: Math.trunc(playSettings.musicSheet.actual[playSettings.musicSheet.index].frequency)
+		}
+		noteObj = new Note(oneNoteData);
+	} else if(playSettings.playingMode.isRandom) {
+		noteObj = makeRandomNoteFromNotes(notes, hand);
+	} else {
+		noteObj = makeRandomNoteFromNotes(notes, hand);
+	}
+	
 
 	blinkPlayingNote(noteObj.name, hand, true);
-	playerControl = playNote(noteObj, voices[voiceIndex]); // returns [oscillator, contextGain]
+	playerControl = playNote(noteObj, voiceIndex, soundwaveType); // returns [oscillator, contextGain]
 
 	delayBeforeNextNote = tempoInMs*noteObj.durationInTicks;
 	delayBeforeNoteStops = tempoInMs*noteObj.durationInTicks;
@@ -155,7 +309,14 @@ function playMelody(voiceIndex, hand) {
 
 
 	setTimeout(function() {
-		var noteObj = makeRandomNoteFromNotes(notes, hand);
+		
+		if(playSettings.playingMode.isWritten) {
+			
+			if(++playSettings.musicSheet.index >= playSettings.musicSheet.actual.length) {
+				playSettings.musicSheet.index = 0;
+			}
+		}
+
 		playMelody(voiceIndex, hand);
 	}, delayBeforeNextNote);
 
@@ -180,35 +341,39 @@ function playVoices() {
 }
 
 
-var spacePitching = 1;
-let spacePitchingDirection = 1;
-var doSpacePitching = false;
-function playNote(noteObj, voice) {
-	if(doSpacePitching) {
+function playNote(noteObj, voiceIndex, soundwaveType) {
+	let thisVoice = voices[voiceIndex];
+
+	if(soundwaveType == null) {
+		soundwaveType = 'sine';
+	}
+
+	let pitchValue = playSettings.pitch.pitchValue;
+	if(playSettings.pitch.isPitching) {
 		if(Math.random() < 0.30) {
 			let diff = getRandomInt(-10, 10) / 1000;
 			
-			if(spacePitching > 1.1 || spacePitching < 0.9) {
-				spacePitchingDirection *= -1;
+			if(pitchValue > 1.1 || pitchValue < 0.9) {
+				playSettings.pitch.pitchDirection *= -1;
 			}
-			spacePitching = 1 - (diff*spacePitchingDirection);
-			console.log('spacePitching ! ' + spacePitching);
+			pitchValue = 1 - (diff*playSettings.pitch.pitchDirection);
+
 		}
 	}
 
-	//console.log(noteObj);
-	let oscillator = voice.createOscillator();
-	let contextGain = voice.createGain();
-	oscillator.type = 'sine';
-	let fff = Math.round((noteObj.frenquencyInHz*spacePitching*10))/10;
+
+	let oscillator = thisVoice.createOscillator();
+	let contextGain = thisVoice.createGain();
+	oscillator.type = soundwaveType; // "sine", "square", "sawtooth", "triangle"
+	let fff = Math.round((noteObj.frenquencyInHz*pitchValue*10))/10;
 	oscillator.frequency.value = fff;
 	oscillator.connect(contextGain);
-	contextGain.gain.value = 0.05;
-	contextGain.connect(voice.destination);
+
+	contextGain.gain.value = 0.05 * playSettings.volume.volumeMultiplierPerVoiceIndex[voiceIndex];
+	contextGain.connect(thisVoice.destination);
 	oscillator.start();
 	return [oscillator, contextGain];
 }
-
 
 
 
@@ -230,11 +395,6 @@ function blinkPlayingNote(noteName, hand, isLightUp) {
 
 
 
-function handleAddVoice(ev) {
-	console.log('handleAddVoice ev ', ev);
-}
-
-
 
 /*
 do re mi sol sol# la
@@ -243,12 +403,8 @@ avec 3x plus d'aiguës
 
 var isPlaying = false;
 var cpt = 0;
-var context = new AudioContext();
-var context2 = new AudioContext();
-var context3 = new AudioContext();
 
 
-tempo = 500;
 
 function makeRandomNoteFromNotes(notes, hand) {
 	let randNote = getRandomIndex(notes);
@@ -275,7 +431,7 @@ function makeCustomScale() {
 }
 
 function handleAddCustomNote(ev) {
-	console.log(ev.currentTarget.id);
+
 	let noteName = ev.currentTarget.id;
 	if(noteNamesForCustomScale.indexOf(noteName) == -1) {
 		noteNamesForCustomScale.push(noteName);
@@ -331,10 +487,12 @@ function refreshCustomScaleDisplay() {
 
 
 
-
-
-
-
+function getFrequencyFromName(noteName) {
+	if(noteName == null || noteName == '') {
+		return 0;
+	}
+	return keyboardMap.get(noteName);
+}
 
 
 
@@ -356,12 +514,48 @@ var chroma = [
 ];
 
 
-let leapStepsForTonalIntervals_major = [0, 1, 1, 0, 1, 1, 1];
-let leapStepsForTonalIntervals_minor = [0, 1, 0, 1, 1, 1, 1];
-let octavesNb = [2,3,4,5];
-function makeTonalitiesNotes() {
-	// TODO :D 
+let isNoteOnOrOffByIndex_MajorScale = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1];
+let isNoteOnOrOffByIndex_MinorScale = [1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1];
+var allTonalities = {
+	majors: [],
+	minors: []
+};
+function makeTonalities(version) {
+
+	let wantedScaleStepsVersion = '';
+	let oneOfTwelve = [];
+	let scaleStepsIndex = 0;
+	switch(version) {
+		case 'major' :
+			wantedScaleStepsVersion = isNoteOnOrOffByIndex_MajorScale;
+		break;
+		case 'minor' :
+			wantedScaleStepsVersion = isNoteOnOrOffByIndex_MinorScale;
+		break;
+	}
+
+	for(let i = 0; i<12; i++) {
+		let oneScale = [];
+		for(let j=i; j<chroma.length; j++) {
+			if(wantedScaleStepsVersion[scaleStepsIndex] == 1) {
+				oneScale.push(chroma[j]);
+			}
+			scaleStepsIndex++;
+			if(scaleStepsIndex%12 == 0) {
+				//scaleStepsIndex += 12;
+				scaleStepsIndex = 0;
+			}
+		}
+		oneOfTwelve.push(oneScale);
+	}
+	return oneOfTwelve;
 }
+
+allTonalities.majors = makeTonalities('major');
+allTonalities.minors = makeTonalities('minor');
+
+
+
 
 
 
@@ -427,9 +621,7 @@ var chosenTonalityLoop = tonalitiesLoopsList[0];
 chosenNotes = tonalitiesLoopsList[0][0];
 displayChosenNotes();
 
-var shouldFlip = true;
 var changingKeyIntervalId;
-var shouldSpeedUp = true;
 var modulationLooper = 0;
 var modulationCount = 0
 var stopModulationEngine = false;
@@ -518,12 +710,19 @@ function initScale() {
 
 
 
-
-
-
-
-
-
+function injectVolumeRangesInDom() {
+	let output = '';
+	console.log('voices : ', voices);
+	for(let i=0; i<voices.length; i++) {
+		output += '<li>';
+		let volumeNumber = parseInt(i)*1+1;
+		output += '<label for="volume0">Volume ' + volumeNumber + '</label>';
+		output += '<input type="range" class="volume-control" name="volume' + i + '" id="volume' + i + '" min="0" max="100" step="1" value="50">';
+		output += '<output class="volume-output" id="output-volume' + i + '" for="volume"></output>';
+		output += '</li>';
+	}
+	$('#volumeContainer ul').html(output);
+}
 
 /*
 var r=[1, 80, 2000] ;
@@ -534,4 +733,3 @@ r.map(function(a){
 
 //==[0.0005,0.04,1]
 */
-console.log(currentScale);
