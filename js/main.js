@@ -23,8 +23,6 @@ let musicSheetTest = [
 
 var playSettings = {
 	playingMode: {
-		// isRandom: false,
-		// isWritten: true
 		isRandom: true,
 		isWritten: false
 	},
@@ -169,6 +167,10 @@ function setEventListeners() {
 	$('#play').click(function() {
 		handleStartPlayingClick();
 	});
+	$('#stop').click(function() {
+		handleStopPlayingClick();
+	});
+	
 
 	$('.oneScale').click(function(ev) {
 
@@ -243,6 +245,8 @@ function handleStopPlayingClick() {
 
 	isPlaying = false;
 	stopModulationEngine = true;
+	$('button#play').removeClass('is-active');
+	$('button#stop').addClass('is-active');	
 
 	return false;
 }
@@ -250,8 +254,10 @@ function handleStartPlayingClick() {
 	isPlaying = true;
 	playMelody(0, 'left');
 	playMelody(1, 'right');
-	playMelody(2, 'right');	
-	
+	playMelody(2, 'right');
+
+	$('button#play').addClass('is-active');
+	$('button#stop').removeClass('is-active');	
 
 	if(playSettings.modulation.shouldModulate) {
 		startModulationEngine();
@@ -400,7 +406,7 @@ function blinkPlayingNote(noteName, hand, isLightUp) {
 do re mi sol sol# la
 avec 3x plus d'aiguës
 */
-
+var octavesNb = [2,3,4,5]
 var isPlaying = false;
 var cpt = 0;
 
@@ -554,7 +560,7 @@ function makeTonalities(version) {
 allTonalities.majors = makeTonalities('major');
 allTonalities.minors = makeTonalities('minor');
 
-
+console.log('allTonalities : ', allTonalities);
 
 
 
@@ -602,6 +608,73 @@ var keyboardList = [{name: 'C0', frq: 16.35},{name: 'Cx0', frq: 17.32},{name: 'D
 var keyboardMap = makeMapByAttrFromList(keyboardList, 'name');
 var tempScalesDictionnary = [do_Majeur,do_mineur,re_Majeur,re_mineur,mi_Majeur,mi_mineur,fa_Majeur,fa_mineur,sol_Majeur,sol_mineur,la_Majeur,la_mineur,si_Majeur,si_mineur];
 
+
+var do_Majeur_chordNotes = ['C2','E2','G2','C3','E3','G3','C4','E4','G4','C5','E5','G5'];
+var do_Majeur7_chordNotes = ['C2','E2','G2','B3','C3','E3','G3','B4','C4','E4','G4','B5','C5','E5','G5','B6'];
+var do_Majeur7m_chordNotes = ['C2','E2','G2','Ax3','C3','E3','G3','Ax4','C4','E4','G4','Ax5','C5','E5','G5','Ax6'];
+var do_mineur_chordNotes = ['C2','Dx2','G2','C3','Dx3','G3','C4','Dx4','G4','C5','Dx5','G5'];
+var do_mineur7_chordNotes = ['C2','Dx2','G2','B3','C3','Dx3','G3','B4','C4','Dx4','G4','B5','C5','Dx5','G5','B6'];
+var do_mineur7m_chordNotes = ['C2','Dx2','G2','Ax3','C3','Dx3','G3','Ax4','C4','Dx4','G4','Ax5','C5','Dx5','G5','Ax6'];
+
+var dox_Majeur_chordNotes = [];
+var dox_Majeur7_chordNotes = [];
+var dox_mineur_chordNotes = [];
+var dox_mineur7_chordNotes = [];
+
+
+var re_Majeur_chordNotes = [];
+var rex_Majeur_chordNotes = [];
+var re_Majeur7_chordNotes = [];
+var rex_Majeur7_chordNotes = [];
+var re_mineur_chordNotes = [];
+var rex_mineur_chordNotes = [];
+var re_mineur7_chordNotes = [];
+var rex_mineur7_chordNotes = [];
+
+var mi_Majeur_chordNotes = [];
+var mi_Majeur7_chordNotes = [];
+var mi_mineur_chordNotes = [];
+var mi_mineur7_chordNotes = [];
+var fa_Majeur_chordNotes = [];
+var fax_Majeur_chordNotes = [];
+var fa_Majeur7_chordNotes = [];
+var fax_Majeur7_chordNotes = [];
+var fa_mineur_chordNotes = [];
+var fax_mineur_chordNotes = [];
+var fa_mineur7_chordNotes = [];
+var fax_mineur7_chordNotes = [];
+
+var sol_Majeur_chordNotes = [];
+var solx_Majeur_chordNotes = [];
+var sol_Majeur7_chordNotes = [];
+var solx_Majeur7_chordNotes = [];
+var sol_mineur_chordNotes = [];
+var solx_mineur_chordNotes = [];
+var sol_mineur7_chordNotes = [];
+var solx_mineur7_chordNotes = [];
+var la_Majeur_chordNotes = [];
+var lax_Majeur_chordNotes = [];
+var la_Majeur7_chordNotes = [];
+var lax_Majeur7_chordNotes = [];
+var la_mineur_chordNotes = [];
+var lax_mineur_chordNotes = [];
+var la_mineur7_chordNotes = [];
+var lax_mineur7_chordNotes = [];
+
+var si_Majeur_chordNotes = [];
+var si_Majeur7_chordNotes = [];
+var si_mineur_chordNotes = [];
+var si_mineur7_chordNotes = [];
+
+
+
+
+
+
+
+var scalesDictionnaryMap = new Map();
+// scalesDictionnaryMap.set('C', do_Majeur);
+
 var chosenNotes;
 // chosenNotes = ACDEGGd;
 // chosenNotes = chroma;
@@ -615,9 +688,29 @@ var tonalitiesLoopsList = [
 		['D2','G2','B2','D3','G3','B3','D4','G4','B4','D5','G5','B5'],
 		['C2','F2','A2','C3','F3','A3','C4','F4','A4','C5','F5','A5',],
 		['E2','Gx2','B2','E3','Gx3','B3','D3','E4','Gx4','B4','D4','E5','Gx5','B5','D5']
+	],
+	[
+		['C3','C4'],
+		do_Majeur_chordNotes,
+		do_Majeur7_chordNotes,
+		do_Majeur7m_chordNotes,
+
+		['C3','C4'],
+		do_mineur_chordNotes,
+		do_mineur_chordNotes,
+		do_mineur7_chordNotes
 	]
 ];
-var chosenTonalityLoop = tonalitiesLoopsList[0];
+
+
+
+
+
+
+
+
+
+var chosenTonalityLoop = tonalitiesLoopsList[1];
 chosenNotes = tonalitiesLoopsList[0][0];
 displayChosenNotes();
 

@@ -21,25 +21,43 @@ img {
 
 #pageContainer {
 	padding: 0.1px;
+	width: 600px;
+	margin: 0 auto;
 }
-#voicesContainer {
+#controlsContainer {
 	border: 1px solid grey;
     margin: 12px auto;
     padding: 12px;
-    width: 200px;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
 }
 
-#playBtnContainer {
-}
-#playBtnContainer button {
-    /* height: 150px; */
-    /* width: 250px; */
+#controlsContainer button {
     display: block;
-    margin: 12px auto;
-    padding: 44px 120px;
+    margin: 0px auto;
+    width: 50%;
+    padding: 44px 80px;
+    color: lightgrey;
+    font-size: 24px;
+    letter-spacing: 20px;
+    text-transform: uppercase;
 }
 
-
+button#play {
+	background-color: rgba(50, 190, 190, 0.6);
+}
+button#play.is-active {
+	background-color: rgba(65, 255, 255, 1);
+	color: black;
+}
+button#stop {
+	background-color: rgba(190, 80, 80, 0.6);
+}
+button#stop.is-active {
+	background-color: rgba(255, 65, 65, 1);
+	color: black;
+}
 
 div#scalesContainer {
 	display: flex;
@@ -114,3 +132,4 @@ button.lightUp-right {
 	justify-content: flex-start;
 	margin-top: 3px;
 }
+
