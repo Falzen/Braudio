@@ -17,18 +17,11 @@ $(document).ready(function() {
 });
 
 
-let musicSheetTest = [
-];
-
 
 var playSettings = {
 	playingMode: {
 		isRandom: true,
 		isWritten: false
-	},
-	musicSheet: {
-		actual: [],
-		index: 0
 	},
 	tempo: {
 		valueInBpm: 90,
@@ -59,97 +52,12 @@ var voices = [];
 var voicesIndexesToStop = [];
 var tempo = 90;
 var tempoInMs = 60000/tempo;
+
 function addVoice() {
 	voices.push(new AudioContext());
 }
 
 function init() {
-
-
-playSettings.musicSheet.actual = [
-{
-	name: 'C4',
-	durationInTicks: 0.93,
-	frequency: getFrequencyFromName('C4')[0].frq
-},
-{
-	name: '',
-	durationInTicks: 0.07,
-	frequency: null,
-},
-
-{
-	name: 'C4',
-	durationInTicks: 0.43,
-	frequency: getFrequencyFromName('C4')[0].frq
-},
-{
-	name: '',
-	durationInTicks: 0.07,
-	frequency: null,
-},
-{
-	name: 'C4',
-	durationInTicks: 0.43,
-	frequency: getFrequencyFromName('C4')[0].frq
-},
-{
-	name: '',
-	durationInTicks: 0.07,
-	frequency: null,
-},
-{
-	name: 'D4',
-	durationInTicks: 0.93,
-	frequency: getFrequencyFromName('D4')[0].frq
-},
-{
-	name: '',
-	durationInTicks: 0.07,
-	frequency: null,
-},
-{
-	name: 'C4',
-	durationInTicks: 0.93,
-	frequency: getFrequencyFromName('C4')[0].frq
-},
-{
-	name: '',
-	durationInTicks: 0.07,
-	frequency: null,
-},
-{
-	name: '',
-	durationInTicks: 1,
-	frequency: null,
-},
-{
-	name: 'E4',
-	durationInTicks: 0.93,
-	frequency: getFrequencyFromName('E4')[0].frq
-},
-{
-	name: '',
-	durationInTicks: 0.07,
-	frequency: null,
-},
-{
-	name: 'F4',
-	durationInTicks: 0.93,
-	frequency: getFrequencyFromName('F4')[0].frq
-},
-{
-	name: '',
-	durationInTicks: 0.07,
-	frequency: null,
-},
-{
-	name: '',
-	durationInTicks: 1,
-	frequency: null,
-}
-];
-
 
 	initScale();
 	addVoice(); // melody one
@@ -269,16 +177,27 @@ function playMelody(voiceIndex, hand) {
 	let soundwaveType = 'sine'; // "sine", "square", "sawtooth", "triangle"
 	switch(hand) {
 		case 'left':
+		if(currentScale.notesRightHand.length == 0) {
+			currentScale.notesLeftHand = currentScale.notesRightHand;
+		}
 		notes = currentScale.notesLeftHand;
 		soundwaveType = 'triangle';
 		break;
 		case 'right':
+		if(currentScale.notesRightHand.length == 0) {
+			currentScale.notesRightHand = currentScale.notesLeftHand;
+		}
 		notes = currentScale.notesRightHand;
 		soundwaveType = 'triangle';
 		break;
 	}
 	if(notes == null || notes.length == 0) {
-
+		console.log('hand: ', hand);
+		console.log('voiceIndex: ', voiceIndex);
+		console.log('currentScale: ', currentScale);
+		console.log('currentScale.notes: ', currentScale.notes);
+		console.log(' => no notes found');
+		return false;
 	}
 	if(!isPlaying) {
 		handleStopPlayingClick();
@@ -289,19 +208,7 @@ function playMelody(voiceIndex, hand) {
 	let playerControl;
 	let delayBeforeNextNote;
 	let delayBeforeNoteStops;
-	var noteObj;
-	if(playSettings.playingMode.isWritten) {
-		let oneNoteData = {
-			name: playSettings.musicSheet.actual[playSettings.musicSheet.index].name,
-			durationInTicks: playSettings.musicSheet.actual[playSettings.musicSheet.index].durationInTicks,
-			frenquencyInHz: Math.trunc(playSettings.musicSheet.actual[playSettings.musicSheet.index].frequency)
-		}
-		noteObj = new Note(oneNoteData);
-	} else if(playSettings.playingMode.isRandom) {
-		noteObj = makeRandomNoteFromNotes(notes, hand);
-	} else {
-		noteObj = makeRandomNoteFromNotes(notes, hand);
-	}
+	var noteObj = makeRandomNoteFromNotes(notes, hand);
 	
 
 	blinkPlayingNote(noteObj.name, hand, true);
@@ -315,14 +222,6 @@ function playMelody(voiceIndex, hand) {
 
 
 	setTimeout(function() {
-		
-		if(playSettings.playingMode.isWritten) {
-			
-			if(++playSettings.musicSheet.index >= playSettings.musicSheet.actual.length) {
-				playSettings.musicSheet.index = 0;
-			}
-		}
-
 		playMelody(voiceIndex, hand);
 	}, delayBeforeNextNote);
 
@@ -414,11 +313,17 @@ var cpt = 0;
 
 function makeRandomNoteFromNotes(notes, hand) {
 	let randNote = getRandomIndex(notes);
+	if(!randNote) {
+		console.log('notes: ', notes);
+		console.log('randNote: ', randNote);
+	}
 	let randFrq = Math.trunc(randNote.frq);
 	let notesDurationForThisVoice = 
 		hand == 'left' 
 		? noteDurationsInTickNb_left
 		: noteDurationsInTickNb_right;
+
+	// let notesDurationForThisVoice = noteDurationsInTickNb;
 
 	let randDurationInTicks = getRandomIndex(notesDurationForThisVoice);
 	let oneNoteData = {
@@ -500,13 +405,16 @@ function getFrequencyFromName(noteName) {
 	return keyboardMap.get(noteName);
 }
 
+/*
+Gammes en dur
+*/
 
 
-var noteDurationsInTickNb = [1,1,0.5,0.5,0.5,0.5,0.25,0.25,0.25]; // ,0.25,0.25,0.25,0.25,0.25,0.25,0.25
+var noteDurationsInTickNb = [10,10,3,3,0.5,0.5,0.5,0.5]; // ,0.25,0.25,0.25,0.25,0.25,0.25,0.25
 // var noteDurationsInTickNb_right = [4/5, 4/7,  4/7,  4/7]
 // var noteDurationsInTickNb_left = [1,1,1,1]; 
-var noteDurationsInTickNb_right = [0.25, 0.25, 0.25, 0.25, 0.5];
-var noteDurationsInTickNb_left = [1, 0.5, 0.5, 0.5, 0.25];
+var noteDurationsInTickNb_left = [2, 2, 4];
+var noteDurationsInTickNb_right = [0.25, 0.25, 0.25, 0.25, 0.5, 0.5];
 var chroma = [
 	'C0', 'Cx0', 'D0', 'Dx0', 'E0', 'F0', 'Fx0', 'G0', 'Gx0', 'A0', 'Ax0', 'B0', 
 	'C1', 'Cx1', 'D1', 'Dx1', 'E1', 'F1', 'Fx1', 'G1', 'Gx1', 'A1', 'Ax1', 'B1', 
@@ -517,6 +425,25 @@ var chroma = [
 	'C6', 'Cx6', 'D6', 'Dx6', 'E6', 'F6', 'Fx6', 'G6', 'Gx6', 'A6', 'Ax6', 'B6', 
 	'C7', 'Cx7', 'D7', 'Dx7', 'E7', 'F7', 'Fx7', 'G7', 'Gx7', 'A7', 'Ax7', 'B7', 
 	'C8', 'Cx8', 'D8', 'Dx8', 'E8', 'F8', 'Fx8', 'G8', 'Gx8', 'A8', 'Ax8', 'B8'
+];
+var chromaCurrated = [
+	'C2', 'Cx2', 'D2', 'Dx2', 'E2', 'F2', 'Fx2', 'G2', 'Gx2', 'A2', 'Ax2', 'B2', 
+	'C3', 'Cx3', 'D3', 'Dx3', 'E3', 'F3', 'Fx3', 'G3', 'Gx3', 'A3', 'Ax3', 'B3', 
+	'C4', 'Cx4', 'D4', 'Dx4', 'E4', 'F4', 'Fx4', 'G4', 'Gx4', 'A4', 'Ax4', 'B4', 
+	'C5', 'Cx5', 'D5', 'Dx5', 'E5', 'F5', 'Fx5', 'G5', 'Gx5', 'A5', 'Ax5', 'B5'
+];
+var gammeParTon = [
+	'C2', 'D2', /*'E2',*/ 'Fx2', 'Gx2', 'Ax2',
+	'C3', 'D3', /*'E3',*/ 'Fx3', 'Gx3', 'Ax3',
+	'C4', 'D4', /*'E4',*/ 'Fx4', 'Gx4', 'Ax4',
+	'C5', 'D5', /*'E5',*/ 'Fx5', 'Gx5', 'Ax5'
+];
+var gammeParTon_X = [
+	'Cx2', 'Dx2', /*'F2',*/ 'G2', 'A2', 'B2', 
+	'Cx3', 'Dx3', /*'F3',*/ 'G3', 'A3', 'B3', 
+	'Cx4', 'Dx4', /*'F4',*/ 'G4', 'A4', 'B4',
+	'Cx5', 'Dx5', /*'F5',*/ 'G5', 'A5', 'B5'
+	
 ];
 
 
@@ -542,9 +469,9 @@ function makeTonalities(version) {
 
 	for(let i = 0; i<12; i++) {
 		let oneScale = [];
-		for(let j=i; j<chroma.length; j++) {
+		for(let j=i; j<chromaCurrated.length; j++) {
 			if(wantedScaleStepsVersion[scaleStepsIndex] == 1) {
-				oneScale.push(chroma[j]);
+				oneScale.push(chromaCurrated[j]);
 			}
 			scaleStepsIndex++;
 			if(scaleStepsIndex%12 == 0) {
@@ -561,7 +488,6 @@ allTonalities.majors = makeTonalities('major');
 allTonalities.minors = makeTonalities('minor');
 
 console.log('allTonalities : ', allTonalities);
-
 
 
 
@@ -604,7 +530,7 @@ var reMajeur = ['D3','Fx3','A3','D4','Fx4','A4','D5','Fx5','A5','A4','D5','Fx5',
 var fadMineur = [ 'A2', 'Cx3', 'Fx3', 'A3', 'Cx4', 'Fx4', 'A4', 'Cx5', 'Fx5', 'A4', 'Cx5', 'Fx5'];
 
 
-var keyboardList = [{name: 'C0', frq: 16.35},{name: 'Cx0', frq: 17.32},{name: 'D0', frq: 18.35},{name: 'Dx0', frq: 19.45},{name: 'E0', frq: 20.60},{name: 'F0', frq: 21.83},{name: 'Fx0', frq: 23.12},{name: 'G0', frq: 24.50},{name: 'Gx0', frq: 25.96},{name: 'A0', frq: 27.50},{name: 'Ax0', frq: 29.14},{name: 'B0', frq: 30.87},{name: 'C1', frq: 32.70},{name: 'Cx1', frq: 34.65},{name: 'D1', frq: 36.71},{name: 'Dx1', frq: 38.89},{name: 'E1', frq: 41.20},{name: 'F1', frq: 43.65},{name: 'Fx1', frq: 46.25},{name: 'G1', frq: 49.00},{name: 'Gx1', frq: 51.91},{name: 'A1', frq: 55.00},{name: 'Ax1', frq: 58.27},{name: 'B1', frq: 61.74},{name: 'C2', frq: 65.41},{name: 'Cx2', frq: 69.30},{name: 'D2', frq: 73.42},{name: 'Dx2', frq: 77.78},{name: 'E2', frq: 82.41},{name: 'F2', frq: 87.31},{name: 'Fx2', frq: 92.50},{name: 'G2', frq: 98.00},{name: 'Gx2', frq: 103.83},{name: 'A2', frq: 110.00},{name: 'Ax2', frq: 116.54},{name: 'B2', frq: 123.47},{name: 'C3', frq: 130.81},{name: 'Cx3', frq: 138.59},{name: 'D3', frq: 146.83},{name: 'Dx3', frq: 155.56},{name: 'E3', frq: 164.81},{name: 'F3', frq: 174.61},{name: 'Fx3', frq: 185.00},{name: 'G3', frq: 196.00},{name: 'Gx3', frq: 207.65},{name: 'A3', frq: 220.00},{name: 'Ax3', frq: 233.08},{name: 'B3', frq: 246.94},{name: 'C4', frq: 261.63},{name: 'Cx4', frq: 277.18},{name: 'D4', frq: 293.66},{name: 'Dx4', frq: 311.13},{name: 'E4', frq: 329.63},{name: 'F4', frq: 349.23},{name: 'Fx4', frq: 369.99},{name: 'G4', frq: 392.00},{name: 'Gx4', frq: 415.30},{name: 'A4', frq: 440.00},{name: 'Ax4', frq: 466.16},{name: 'B4', frq: 493.88},{name: 'C5', frq: 523.25},{name: 'Cx5', frq: 554.37},{name: 'D5', frq: 587.33},{name: 'Dx5', frq: 622.25},{name: 'E5', frq: 659.25},{name: 'F5', frq: 698.46},{name: 'Fx5', frq: 739.99},{name: 'G5', frq: 783.99},{name: 'Gx5', frq: 830.61},{name: 'A5', frq: 880.00},{name: 'Ax5', frq: 932.33},{name: 'B5', frq: 987.77},{name: 'C6', frq: 1046.50},{name: 'Cx6', frq: 1108.73},{name: 'D6', frq: 1174.66},{name: 'Dx6', frq: 1244.51},{name: 'E6', frq: 1318.51},{name: 'F6', frq: 1396.91},{name: 'Fx6', frq: 1479.98},{name: 'G6', frq: 1567.98},{name: 'Gx6', frq: 1661.22},{name: 'A6', frq: 1760.00},{name: 'Ax6', frq: 1864.66},{name: 'B6', frq: 1975.53},{name: 'C7', frq: 2093.00},{name: 'Cx7', frq: 2217.46},{name: 'D7', frq: 2349.32},{name: 'Dx7', frq: 2489.02},{name: 'E7', frq: 2637.02},{name: 'F7', frq: 2793.83},{name: 'Fx7', frq: 2959.96},{name: 'G7', frq: 3135.96},{name: 'Gx7', frq: 3322.44},{name: 'A7', frq: 3520.00},{name: 'Ax7', frq: 3729.31},{name: 'B7', frq: 3951.07},{name: 'C8', frq: 4186.01},{name: 'Cx8', frq: 4434.92},{name: 'D8', frq: 4698.63},{name: 'Dx8', frq: 4978.03},{name: 'E8', frq: 5274.04},{name: 'F8', frq: 5587.65},{name: 'Fx8', frq: 5919.91},{name: 'G8', frq: 6271.93},{name: 'Gx8', frq: 6644.88},{name: 'A8', frq: 7040.00},{name: 'Ax8', frq: 7458.62},{name: 'B8', frq: 7902.13}];
+var keyboardList = [{name: 'silence', frq: 0.00},{name: 'C0', frq: 16.35},{name: 'Cx0', frq: 17.32},{name: 'D0', frq: 18.35},{name: 'Dx0', frq: 19.45},{name: 'E0', frq: 20.60},{name: 'F0', frq: 21.83},{name: 'Fx0', frq: 23.12},{name: 'G0', frq: 24.50},{name: 'Gx0', frq: 25.96},{name: 'A0', frq: 27.50},{name: 'Ax0', frq: 29.14},{name: 'B0', frq: 30.87},{name: 'C1', frq: 32.70},{name: 'Cx1', frq: 34.65},{name: 'D1', frq: 36.71},{name: 'Dx1', frq: 38.89},{name: 'E1', frq: 41.20},{name: 'F1', frq: 43.65},{name: 'Fx1', frq: 46.25},{name: 'G1', frq: 49.00},{name: 'Gx1', frq: 51.91},{name: 'A1', frq: 55.00},{name: 'Ax1', frq: 58.27},{name: 'B1', frq: 61.74},{name: 'C2', frq: 65.41},{name: 'Cx2', frq: 69.30},{name: 'D2', frq: 73.42},{name: 'Dx2', frq: 77.78},{name: 'E2', frq: 82.41},{name: 'F2', frq: 87.31},{name: 'Fx2', frq: 92.50},{name: 'G2', frq: 98.00},{name: 'Gx2', frq: 103.83},{name: 'A2', frq: 110.00},{name: 'Ax2', frq: 116.54},{name: 'B2', frq: 123.47},{name: 'C3', frq: 130.81},{name: 'Cx3', frq: 138.59},{name: 'D3', frq: 146.83},{name: 'Dx3', frq: 155.56},{name: 'E3', frq: 164.81},{name: 'F3', frq: 174.61},{name: 'Fx3', frq: 185.00},{name: 'G3', frq: 196.00},{name: 'Gx3', frq: 207.65},{name: 'A3', frq: 220.00},{name: 'Ax3', frq: 233.08},{name: 'B3', frq: 246.94},{name: 'C4', frq: 261.63},{name: 'Cx4', frq: 277.18},{name: 'D4', frq: 293.66},{name: 'Dx4', frq: 311.13},{name: 'E4', frq: 329.63},{name: 'F4', frq: 349.23},{name: 'Fx4', frq: 369.99},{name: 'G4', frq: 392.00},{name: 'Gx4', frq: 415.30},{name: 'A4', frq: 440.00},{name: 'Ax4', frq: 466.16},{name: 'B4', frq: 493.88},{name: 'C5', frq: 523.25},{name: 'Cx5', frq: 554.37},{name: 'D5', frq: 587.33},{name: 'Dx5', frq: 622.25},{name: 'E5', frq: 659.25},{name: 'F5', frq: 698.46},{name: 'Fx5', frq: 739.99},{name: 'G5', frq: 783.99},{name: 'Gx5', frq: 830.61},{name: 'A5', frq: 880.00},{name: 'Ax5', frq: 932.33},{name: 'B5', frq: 987.77},{name: 'C6', frq: 1046.50},{name: 'Cx6', frq: 1108.73},{name: 'D6', frq: 1174.66},{name: 'Dx6', frq: 1244.51},{name: 'E6', frq: 1318.51},{name: 'F6', frq: 1396.91},{name: 'Fx6', frq: 1479.98},{name: 'G6', frq: 1567.98},{name: 'Gx6', frq: 1661.22},{name: 'A6', frq: 1760.00},{name: 'Ax6', frq: 1864.66},{name: 'B6', frq: 1975.53},{name: 'C7', frq: 2093.00},{name: 'Cx7', frq: 2217.46},{name: 'D7', frq: 2349.32},{name: 'Dx7', frq: 2489.02},{name: 'E7', frq: 2637.02},{name: 'F7', frq: 2793.83},{name: 'Fx7', frq: 2959.96},{name: 'G7', frq: 3135.96},{name: 'Gx7', frq: 3322.44},{name: 'A7', frq: 3520.00},{name: 'Ax7', frq: 3729.31},{name: 'B7', frq: 3951.07},{name: 'C8', frq: 4186.01},{name: 'Cx8', frq: 4434.92},{name: 'D8', frq: 4698.63},{name: 'Dx8', frq: 4978.03},{name: 'E8', frq: 5274.04},{name: 'F8', frq: 5587.65},{name: 'Fx8', frq: 5919.91},{name: 'G8', frq: 6271.93},{name: 'Gx8', frq: 6644.88},{name: 'A8', frq: 7040.00},{name: 'Ax8', frq: 7458.62},{name: 'B8', frq: 7902.13}];
 var keyboardMap = makeMapByAttrFromList(keyboardList, 'name');
 var tempScalesDictionnary = [do_Majeur,do_mineur,re_Majeur,re_mineur,mi_Majeur,mi_mineur,fa_Majeur,fa_mineur,sol_Majeur,sol_mineur,la_Majeur,la_mineur,si_Majeur,si_mineur];
 
@@ -710,14 +636,34 @@ var tonalitiesLoopsList = [
 
 
 
-var chosenTonalityLoop = tonalitiesLoopsList[1];
-chosenNotes = tonalitiesLoopsList[0][0];
+
+var chosenTonalityLoop = [];
+
+chosenTonalityLoop = allTonalities.majors;
+
+chosenNotes = chosenTonalityLoop[0];
+
+
+
+
+
+
+
+
+
+
+
+
+
+// playSettings.modulation.shouldModulate = true;
+
 displayChosenNotes();
 
 var changingKeyIntervalId;
 var modulationLooper = 0;
 var modulationCount = 0
 var stopModulationEngine = false;
+
 function startModulationEngine() {
 
 	if(!isPlaying || stopModulationEngine) {
@@ -805,7 +751,6 @@ function initScale() {
 
 function injectVolumeRangesInDom() {
 	let output = '';
-	console.log('voices : ', voices);
 	for(let i=0; i<voices.length; i++) {
 		output += '<li>';
 		let volumeNumber = parseInt(i)*1+1;
