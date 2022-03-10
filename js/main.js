@@ -413,8 +413,8 @@ Gammes en dur
 var noteDurationsInTickNb = [10,10,3,3,0.5,0.5,0.5,0.5]; // ,0.25,0.25,0.25,0.25,0.25,0.25,0.25
 // var noteDurationsInTickNb_right = [4/5, 4/7,  4/7,  4/7]
 // var noteDurationsInTickNb_left = [1,1,1,1]; 
-var noteDurationsInTickNb_left = [2, 2, 4];
-var noteDurationsInTickNb_right = [0.25, 0.25, 0.25, 0.25, 0.5, 0.5];
+var noteDurationsInTickNb_left = [1.2];
+var noteDurationsInTickNb_right = [0.25];
 var chroma = [
 	'C0', 'Cx0', 'D0', 'Dx0', 'E0', 'F0', 'Fx0', 'G0', 'Gx0', 'A0', 'Ax0', 'B0', 
 	'C1', 'Cx1', 'D1', 'Dx1', 'E1', 'F1', 'Fx1', 'G1', 'Gx1', 'A1', 'Ax1', 'B1', 
@@ -444,6 +444,25 @@ var gammeParTon_X = [
 	'Cx4', 'Dx4', /*'F4',*/ 'G4', 'A4', 'B4',
 	'Cx5', 'Dx5', /*'F5',*/ 'G5', 'A5', 'B5'
 	
+];
+var manaC = [
+	'C2', 'D2','E2', 'G2', 'A2', 
+	'C3', 'D3','E3', 'G3', 'A3', 
+	'C4', 'D4','E4', 'G4', 'A4', 
+	'C5', 'D5','E5', 'G5', 'A5'];
+
+var manaD = [
+	'D2', 'E2', 'G2', 'A2', 'B2', 
+	'D3', 'E3', 'G3', 'A3', 'B3', 
+	'D4', 'E4', 'G4', 'A4', 'B4', 
+	'D5', 'E5', 'G5', 'A5', 'B5'
+];
+
+var manaF = [
+	'D2', 'F2', 'G2', 'A2', 
+	'D3', 'F3', 'G3', 'A3', 
+	'D4', 'F4', 'G4', 'A4', 
+	'D5', 'F5', 'G5', 'A5'
 ];
 
 
@@ -640,6 +659,7 @@ var tonalitiesLoopsList = [
 var chosenTonalityLoop = [];
 
 chosenTonalityLoop = allTonalities.majors;
+chosenTonalityLoop = [manaC, manaD, manaF];
 
 chosenNotes = chosenTonalityLoop[0];
 
